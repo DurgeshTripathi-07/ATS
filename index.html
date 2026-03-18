@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Resume Career Predictor</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root{
+  --primary:#4F46E5;
+  --secondary:#7C3AED;
+  --bg:linear-gradient(135deg,#667eea,#764ba2);
+  --glass:rgba(255,255,255,0.88);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Poppins,sans-serif;
+  background:var(--bg);
+  min-height:100vh;
+  padding:40px 20px;
+  color:#1e293b;
+}
+
+.main-wrapper{
+  max-width:900px;
+  margin:auto;
+}
+
+.main-card{
+  background:var(--glass);
+  backdrop-filter:blur(18px);
+  border-radius:30px;
+  padding:45px;
+  box-shadow:
+    0 35px 90px rgba(0,0,0,0.28),
+    inset 0 0 0 1px rgba(255,255,255,0.45);
+  animation:slideUp .6s ease;
+}
+
+/* HEADER */
+.header{
+  text-align:center;
+  margin-bottom:40px;
+}
+.header h1{
+  font-size:2.8rem;
+  font-weight:700;
+  background:linear-gradient(to right,var(--primary),var(--secondary));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.header p{
+  color:#64748b;
+  margin-top:10px;
+}
+
+/* STEPS */
+.steps{
+  display:flex;
+  justify-content:space-between;
+  font-size:.85rem;
+  color:#64748b;
+  margin-bottom:30px;
+}
+
+/* ACTION SECTION */
+.action-section{
+  padding:35px;
+  border-radius:22px;
+  background:linear-gradient(
+    180deg,
+    rgba(255,255,255,0.95),
+    rgba(255,255,255,0.85)
+  );
+}
+
+/* UPLOAD */
+.upload-container{
+  border:2px dashed rgba(79,70,229,0.4);
+  border-radius:20px;
+  padding:45px;
+  text-align:center;
+  cursor:pointer;
+  background:
+    radial-gradient(circle at top,
+    rgba(79,70,229,0.1),
+    transparent 70%);
+  transition:.35s;
+  position:relative;
+}
+.upload-container:hover{
+  transform:translateY(-3px);
+  background:
+    radial-gradient(circle at top,
+    rgba(79,70,229,0.18),
+    transparent 70%);
+}
+.upload-container:active{
+  transform:scale(.98);
+}
+.upload-icon{
+  font-size:46px;
+  color:var(--primary);
+  margin-bottom:15px;
+}
+input[type=file]{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  cursor:pointer;
+}
+
+#fileName{
+  text-align:center;
+  margin-top:12px;
+  font-weight:600;
+  color:var(--primary);
+}
+
+/* BUTTON */
+.analyze-btn{
+  width:100%;
+  margin-top:28px;
+  padding:17px;
+  font-size:1.1rem;
+  font-weight:600;
+  border:none;
+  border-radius:16px;
+  color:#fff;
+  background:linear-gradient(90deg,var(--primary),var(--secondary));
+  cursor:pointer;
+  box-shadow:0 14px 30px rgba(79,70,229,.4);
+  transition:.3s;
+}
+.analyze-btn:hover{transform:translateY(-2px)}
+.analyze-btn:disabled{
+  background:#cbd5e1;
+  box-shadow:none;
+  cursor:not-allowed;
+}
+
+/* LOADER */
+.loader{
+  text-align:center;
+  margin-top:30px;
+  display:none;
+}
+.spinner{
+  width:44px;
+  height:44px;
+  border:4px solid #e2e8f0;
+  border-top:4px solid var(--primary);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin:0 auto 14px;
+}
+.ai-text{
+  font-size:.9rem;
+  color:#475569;
+  animation:pulse 1.5s infinite;
+}
+.progress{
+  height:6px;
+  width:70%;
+  margin:14px auto 0;
+  background:#e5e7eb;
+  border-radius:10px;
+  overflow:hidden;
+}
+.progress span{
+  display:block;
+  height:100%;
+  width:100%;
+  background:linear-gradient(90deg,var(--primary),var(--secondary));
+  animation:progress 2s linear infinite;
+}
+
+/* RESULTS */
+.results-container{
+  display:none;
+  margin-top:70px;
+  padding-top:45px;
+  border-top:2px solid rgba(0,0,0,0.06);
+  animation:fadeIn .6s ease;
+}
+
+.score-card{
+  background:linear-gradient(135deg,#10b981,#059669);
+  color:#fff;
+  padding:26px;
+  border-radius:22px;
+  text-align:center;
+  margin-bottom:32px;
+  position:relative;
+  overflow:hidden;
+}
+.score-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at top,
+    rgba(255,255,255,0.45),
+    transparent 60%);
+}
+.score-val{
+  font-size:2.8rem;
+  font-weight:700;
+}
+
+.info-card{
+  background:#fff;
+  border-radius:22px;
+  padding:28px;
+  margin-bottom:22px;
+  box-shadow:0 8px 14px rgba(0,0,0,.05);
+}
+.info-card h3{
+  margin-top:0;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:var(--primary);
+}
+.info-content{
+  color:#475569;
+  font-size:.95rem;
+  line-height:1.75;
+  white-space:pre-wrap;
+}
+
+/* FOOTER (FIXED PROPERLY) */
+footer{
+  margin-top:70px;
+  text-align:center;
+  font-size:.8rem;
+  color:#e5e7eb;
+}
+
+/* ANIMATIONS */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes slideUp{from{transform:translateY(45px);opacity:0}to{opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes progress{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes pulse{0%{opacity:.5}50%{opacity:1}100%{opacity:.5}}
+
+@media(max-width:600px){
+  .main-card{padding:28px}
+  .header h1{font-size:2rem}
+}
+</style>
+</head>
+
+<body>
+
+<div class="main-wrapper">
+  <div class="main-card">
+
+    <div class="header">
+      <h1>Resume Based Career Prediction</h1>
+      <p>AI-powered resume analysis & career recommendations</p>
+    </div>
+
+    <div class="steps">
+      <span>1️⃣ Upload Resume</span>
+      <span>2️⃣ AI Analysis</span>
+      <span>3️⃣ Career Result</span>
+    </div>
+
+    <section class="action-section">
+      <div class="upload-container">
+        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+        <h3>Upload your resume</h3>
+        <p style="color:#94a3b8;font-size:.9rem">PDF, DOCX or TXT</p>
+        <input type="file" id="resumeFile" accept=".pdf,.docx,.txt" onchange="showFileName()">
+      </div>
+
+      <p id="fileName"></p>
+
+      <button class="analyze-btn" id="checkBtn" onclick="analyzeResume()">
+        <i class="fas fa-magic"></i> Analyze Resume
+      </button>
+
+      <div class="loader" id="loading">
+        <div class="spinner"></div>
+        <p class="ai-text">AI is analyzing skills, experience & keywords…</p>
+        <div class="progress"><span></span></div>
+      </div>
+    </section>
+
+    <div class="results-container" id="results">
+      <div class="score-card">
+        <div>Resume Quality Score</div>
+        <div class="score-val" id="scoreBox">0/100</div>
+      </div>
+
+      <div class="info-card">
+        <h3><i class="fas fa-clipboard-check"></i> Improvement Feedback</h3>
+        <div class="info-content" id="feedbackText"></div>
+      </div>
+
+      <div class="info-card" style="border-left:6px solid var(--secondary)">
+        <h3><i class="fas fa-briefcase"></i> Recommended Careers</h3>
+        <div class="info-content" id="jobsText"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+   © 2026 Durgesh Tripathi. All rights reserved.
+  </footer>
+</div>
+
+<script type="module">
+import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+
+window.showFileName=()=>{
+  const f=document.getElementById("resumeFile");
+  document.getElementById("fileName").textContent=
+    f.files.length?"Selected: "+f.files[0].name:"";
+}
+
+window.analyzeResume=async()=>{
+  const f=document.getElementById("resumeFile");
+  if(!f.files.length){
+    alert("Please upload a resume first");
+    return;
+  }
+
+  const btn=document.getElementById("checkBtn");
+  const load=document.getElementById("loading");
+  const res=document.getElementById("results");
+
+  btn.disabled=true;
+  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Processing';
+  load.style.display="block";
+  res.style.display="none";
+
+  try{
+    const app=await client("Armour-12/resume-api");
+    const out=await app.predict("/predict",[f.files[0]]);
+    scoreBox.innerText=out.data[0];
+    feedbackText.innerText=out.data[1];
+    jobsText.innerText=out.data[2];
+    load.style.display="none";
+    res.style.display="block";
+    btn.innerHTML='<i class="fas fa-check"></i> Completed';
+  }catch(e){
+    alert("AI error occurred. Please try again.");
+    btn.innerHTML='<i class="fas fa-magic"></i> Analyze Resume';
+  }finally{
+    btn.disabled=false;
+  }
+}
+</script>
+
+</body>
+</html>
